@@ -1,9 +1,9 @@
 package data
 
 type Rank struct {
-	Ovr int `json:"ovr"`
-	Off int `json:"off"`
-	Def int `json:"def"`
+	Ovr float64 `json:"ovr"`
+	Off float64 `json:"off"`
+	Def float64 `json:"def"`
 }
 
 type Team struct {
@@ -20,7 +20,7 @@ var Teams = []Team{
 		Name:       "Ducks",
 		Division:   "Pacific",
 		Conference: "Western",
-		Rank:       Rank{Ovr: 75, Off: 74, Def: 76},
+		Rank:       Rank{Ovr: 84, Off: 84, Def: 84},
 	},
 	{
 		Key:        "bruins",
@@ -184,13 +184,6 @@ var Teams = []Team{
 		Rank:       Rank{Ovr: 84, Off: 85, Def: 83},
 	},
 	{
-		Key:        "ducks",
-		Name:       "Ducks",
-		Division:   "Pacific",
-		Conference: "Western",
-		Rank:       Rank{Ovr: 75, Off: 74, Def: 76},
-	},
-	{
 		Key:        "coyotes",
 		Name:       "Coyotes",
 		Division:   "Pacific",
@@ -248,22 +241,16 @@ var Teams = []Team{
 	},
 }
 
-type ScoreOdds struct {
-	Goals map[int]float64
-}
-
-var goalsOdds = ScoreOdds{
-	Goals: map[int]float64{
-		0:  8.0,
-		1:  18.0,
-		2:  22.0,
-		3:  22.0,
-		4:  14.0,
-		5:  8.0,
-		6:  4.0,
-		7:  2.0,
-		8:  1.0,
-		9:  0.5,
-		10: 0.5,
-	},
+var GoalsOdds = map[float64]float64{
+	0:  8.0,
+	1:  18.0,
+	2:  22.0,
+	3:  22.0,
+	4:  14.0,
+	5:  8.0,
+	6:  4.0,
+	7:  2.0,
+	8:  1.0,
+	9:  0.5,
+	10: 0.5,
 }
