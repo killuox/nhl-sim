@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/killuox/nhl-sim/data"
 )
@@ -85,23 +86,55 @@ type Game struct {
 
 func (g *Game) start() {
 	fmt.Println("The game is starting!")
-	isOvertime := false
-	// Calculate goals based on the teams' ranks off vs def
-	team1Score := getRandomGoal(data.GoalsOdds, g.Team1.Rank.Off, g.Team2.Rank.Def)
-	team2Score := getRandomGoal(data.GoalsOdds, g.Team2.Rank.Off, g.Team1.Rank.Def)
+	fmt.Println("---------------")
 
+	isOvertime := false
+	team1Score := 0
+	team2Score := 0
+
+	// FIRST
+	team1Score += g.simPeriod(g.Team1.Rank.Off, g.Team2.Rank.Def)
+	team2Score += g.simPeriod(g.Team2.Rank.Off, g.Team1.Rank.Def)
+	g.showResult(team1Score, team2Score, "First")
+
+	// SECOND
+	team1Score += g.simPeriod(g.Team1.Rank.Off, g.Team2.Rank.Def)
+	team2Score += g.simPeriod(g.Team2.Rank.Off, g.Team1.Rank.Def)
+	g.showResult(team1Score, team2Score, "Second")
+
+	// THIRD
+	team1Score += g.simPeriod(g.Team1.Rank.Off, g.Team2.Rank.Def)
+	team2Score += g.simPeriod(g.Team2.Rank.Off, g.Team1.Rank.Def)
+	g.showResult(team1Score, team2Score, "Third")
+
+	// OVERTIME
 	if team1Score == team2Score {
 		team1Result, team2Result := g.overtime(g.Team1, g.Team2)
 
-		team1Score += team1Result
-		team2Score += team2Result
+		team1Score += int(team1Result)
+		team2Score += int(team2Result)
 
 		isOvertime = true
 	}
+	g.endGame(team1Score, team2Score, isOvertime)
+}
 
-	fmt.Println("---------------")
-	fmt.Printf("%s: %v\n", g.Team1.Name, team1Score)
-	fmt.Printf("%s: %v\n", g.Team2.Name, team2Score)
+func (g *Game) endGame(team1Score int, team2Score int, isOvertime bool) {
+	green := "\033[32m"
+	red := "\033[31m"
+	reset := "\033[0m"
+
+	fmt.Println("Game ended")
+
+	if team1Score > team2Score {
+		// Team1 wins, print their score in green and Team2's in red
+		fmt.Printf("%s: %s%v%s\n", g.Team1.Name, green, team1Score, reset)
+		fmt.Printf("%s: %s%v%s\n", g.Team2.Name, red, team2Score, reset)
+	} else if team2Score > team1Score {
+		// Team2 wins, print their score in green and Team1's in red
+		fmt.Printf("%s: %s%v%s\n", g.Team1.Name, red, team1Score, reset)
+		fmt.Printf("%s: %s%v%s\n", g.Team2.Name, green, team2Score, reset)
+	}
 	if isOvertime {
 		fmt.Println("OT")
 	}
@@ -109,6 +142,7 @@ func (g *Game) start() {
 }
 
 func (g *Game) overtime(team1 data.Team, team2 data.Team) (float64, float64) {
+	fmt.Println("OVERTIME!")
 	team1Chances := team1.Rank.Ovr - team2.Rank.Ovr
 	team2Chances := team2.Rank.Ovr - team1.Rank.Ovr
 
@@ -123,4 +157,17 @@ func (g *Game) overtime(team1 data.Team, team2 data.Team) (float64, float64) {
 	} else {
 		return 0, 1 // Team2 wins
 	}
+}
+
+func (g *Game) showResult(team1Score int, team2Score int, period string) {
+	fmt.Printf("%s period results:\n", period)
+	fmt.Printf("%s: %v\n", g.Team1.Name, team1Score)
+	fmt.Printf("%s: %v\n", g.Team2.Name, team2Score)
+	fmt.Println("---------------")
+	time.Sleep(1 * time.Second)
+}
+
+func (g *Game) simPeriod(off float64, def float64) int {
+	// Calculate goals based on the teams' ranks off vs def
+	return int(getRandomGoal(data.GoalsOddsPerPeriod, off, def))
 }
